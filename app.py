@@ -20,45 +20,45 @@ st.title("🌱 Plant Protein Function Predictor")
 sequence = st.text_area("Enter Amino Acid Sequence")
 
 if st.button("Predict"):
+    try:
+        if not sequence:
+            st.warning("Please enter a sequence.")
+        else:
+            with st.spinner("Loading models..."):
 
-    if not sequence:
-        st.warning("Please enter a sequence.")
-    else:
-        with st.spinner("Loading models..."):
+                esm_model, alphabet = load_esm_model(device)
+                projection = load_projection(os.path.join(MODEL_DIR, "projection.pt"), device)
+                gat_model = load_gat_model(os.path.join(MODEL_DIR, "gat_mf.pt"), device)
 
-            esm_model, alphabet = load_esm_model(device)
-            projection = load_projection(os.path.join(MODEL_DIR, "projection.pt"), device)
-            gat_model = load_gat_model(os.path.join(MODEL_DIR, "gat_mf.pt"), device)
+                idx_to_go = torch.load(os.path.join(MODEL_DIR, "mf_idx_to_go.pt"))
 
-            idx_to_go = torch.load(os.path.join(MODEL_DIR, "mf_idx_to_go.pt"))
+            with st.spinner("Processing sequence..."):
 
-        with st.spinner("Processing sequence..."):
+                embeddings, attention = extract_embeddings_and_attention(
+                    esm_model,
+                    alphabet,
+                    sequence,
+                    projection,
+                    device
+                )
 
-            embeddings, attention = extract_embeddings_and_attention(
-                esm_model,
-                alphabet,
-                sequence,
-                projection,
-                device
-            )
+                graph = build_graph(embeddings, attention)
 
-            graph = build_graph(embeddings, attention)
+                results, edge_index, attn_weights = predict(
+                    gat_model,
+                    graph,
+                    idx_to_go,
+                    device="cpu",
+                    top_k=5
+                )
 
-            results, edge_index, attn_weights = predict(
-                gat_model,
-                graph,
-                idx_to_go,
-                device="cpu",
-                top_k=5
-            )
+                from inference import compute_residue_importance
 
-            from inference import compute_residue_importance
-
-            residue_importance = compute_residue_importance(
-                edge_index,
-                attn_weights,
-                graph.x.shape[0]
-            )
+                residue_importance = compute_residue_importance(
+                    edge_index,
+                    attn_weights,
+                    graph.x.shape[0]
+                )
 
 
         st.success("Prediction Complete")
@@ -103,5 +103,9 @@ if st.button("Predict"):
         )
 
         st.plotly_chart(fig_3d, use_container_width=True)
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+        import traceback
+        st.code(traceback.format_exc())
 
 
