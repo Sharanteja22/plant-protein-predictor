@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
-from src.model import ProteinGAT
+from model import ProteinGAT
 
 
 def load_gat_model(model_path, device="cpu"):

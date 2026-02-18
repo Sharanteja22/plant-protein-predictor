@@ -52,7 +52,7 @@ if st.button("Predict"):
                 top_k=5
             )
 
-            from src.inference import compute_residue_importance
+            from inference import compute_residue_importance
 
             residue_importance = compute_residue_importance(
                 edge_index,
