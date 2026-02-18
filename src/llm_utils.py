@@ -1,10 +1,16 @@
 import os
+import streamlit as st
 from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
+# For local development
 api_key = os.getenv("GEMINI_API_KEY")
+
+# For Streamlit Cloud deployment
+if not api_key and "GEMINI_API_KEY" in st.secrets:
+    api_key = st.secrets["GEMINI_API_KEY"]
 
 def generate_explanation(go_terms):
 
