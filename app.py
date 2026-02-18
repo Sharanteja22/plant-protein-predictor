@@ -4,11 +4,11 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from src.esm_utils import load_esm_model, load_projection, extract_embeddings_and_attention
-from src.graph_builder import build_graph
-from src.inference import load_gat_model, predict
-from src.llm_utils import generate_explanation
-from src.graph_visualization import create_3d_residue_graph
+from esm_utils import load_esm_model, load_projection, extract_embeddings_and_attention
+from graph_builder import build_graph
+from inference import load_gat_model, predict
+from llm_utils import generate_explanation
+from graph_visualization import create_3d_residue_graph
 
 MODEL_DIR = "models"
 
